@@ -1,0 +1,71 @@
+model:
+  type: "torch"
+  path: null # can be multiple files tho.
+
+mgen: # model gen.
+  max_nodes: 5
+  nodes_allocation: [3, 2, 1]
+  timeout_ms: 10000
+  vulops: True
+  method: "TVMFusion"
+  save: "nnsmith_output"
+  seed: null
+  max_elem_per_tensor: 65536 # 2^16
+  rank_choices: (4,) # 0 ~ __MAX_RANK__
+  dtype_choices: null # 0 ~ __MAX_DTYPE__
+  include: null # ops to include; example mgen.include="[core.NCHWConv2d, core.ReLU]"
+  exclude: null # ops to exclude;
+  patch_requires: [] # files that with @patch_requires
+  grad_check: false # additionally check gradients
+
+# backend config
+backend:
+  type: "torchjit"
+  optmax: true
+  target: "cpu"
+
+ad:
+  type: null
+
+cache:
+  topset: true # Run dtype test with automatically maintained cache
+
+debug:
+  viz: true
+  viz_fmt: "png" # or "svg" for much smaller figure size and precision;
+
+fuzz:
+  time: 14400
+  iter: 1 # 24800
+  root: "/root/ysy/offsmith/reports_test"
+  seed: null
+  crash_safe: false
+  test_timeout: null
+  save_test: "/root/ysy/offsmith/save_tests_test"
+
+filter:
+  type: ['nan', 'inf', 'dup']
+  patch: []
+
+cmp:
+  equal_nan: true # skip regarding it as a bug if with fp exception values.
+
+  raw_input: null # path to raw input data (Dict[str, np.ndarray])
+
+  oracle: "auto"
+  # "auto": use `oracle.pkl` in local path;
+  # PathLike: get the oracle from somewhere else;
+  # null: fallback to random.
+
+  with:
+    type: null
+    optmax: true
+    target: "cpu"
+
+  seed: null
+  bug_presence: "report" # or "crash"
+  save: null # path to save the bug report if `bug_presence` is "report"
+
+defaults:
+  - override hydra/job_logging: file
+  - override hydra/hydra_logging: colorlog
